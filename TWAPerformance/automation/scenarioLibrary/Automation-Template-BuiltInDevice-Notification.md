@@ -58,8 +58,10 @@ FROM
 			JOIN [dbo].[MediaDevices] MD ON MD.[CallId] = C.[CallId] AND MD.[SegmentId] = S.[SegmentId]
 			JOIN [dbo].[MediaStreams] MS ON MS.[CallId] = C.[CallId] AND MS.[SegmentId] = S.[SegmentId]
 				AND MS.[MediaLabel] = MD.[MediaLabel] AND MS.[StreamDirection] = MD.[StreamDirection]
+			JOIN [dbo].[Endpoints] e on C.CallId = e.CallId AND MD.SegmentId = e.SegmentId AND MD.StreamDirection = 1 AND e.IsCallee = 1
 		WHERE
 			CONVERT(DATE, C.[StartDateTime]) >= CONVERT(DATE, DATEADD(DAY, -7, GETUTCDATE()))
+			AND			e.[Platform] not in ('iOS','Android')
 		) I
 	WHERE
 		I.[UserType] = 1
@@ -77,6 +79,7 @@ GROUP BY
 HAVING
 	SUM(II.[HasUncertifiedCaptureDeviceInCall]) > 0 OR
 	SUM(II.[HasUncertifiedRenderDeviceInCall]) > 0
+
 
 END
 GO
